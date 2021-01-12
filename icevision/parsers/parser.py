@@ -37,6 +37,11 @@ class Parser(ImageidMixin, SizeMixin, ParserInterface, ABC):
     ```
     """
 
+    def __init__(self, class_map: Optional[ClassMap] = None):
+        self.class_map = class_map or ClassMap()
+        if class_map is None:
+            self.class_map.unlock()
+
     @abstractmethod
     def __iter__(self) -> Any:
         pass
