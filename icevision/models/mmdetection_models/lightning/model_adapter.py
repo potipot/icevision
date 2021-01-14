@@ -41,22 +41,12 @@ class ModelAdapter(LightningModelAdapter, ABC):
         data, samples = batch
         self.model.eval()
         with torch.no_grad():
-            results = self.model.simple_test(data["img"], data["img_metas"])
             outputs = self.model.train_step(data=data, optimizer=None)
-
-            set_trace()
-
-            # losses = self.model.val_step(data=data, optimizer=None)
-            # preds = self.model(return_loss=False, **data)
-            # # TODO: Similar problem to faster_rcnn, does not return the predictions
-
-            # preds = efficientdet.convert_raw_predictions(raw_preds["detections"], 0)
-            # loss = efficientdet.loss_fn(raw_preds, yb)
 
         # self.accumulate_metrics(samples, preds)
 
         for k, v in outputs["log_vars"].items():
-            self.log(f"train/{k}", v)
+            self.log(f"valid/{k}", v)
 
     def validation_epoch_end(self, outs):
         self.finalize_metrics()
