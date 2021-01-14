@@ -7,8 +7,8 @@ __all__ = [
     "infer_dl",
 ]
 
-from icevision.imports import *
 from icevision.core import *
+from icevision.imports import *
 from icevision.models.utils import *
 
 
