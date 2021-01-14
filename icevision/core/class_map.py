@@ -34,6 +34,7 @@ class ClassMap:
             if not self._lock:
                 self._classes.append(name)
                 self._update_ids()
+                return self._class2id[name]
             else:
                 raise e
 
