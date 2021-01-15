@@ -10,6 +10,8 @@ __all__ = [
 from icevision.core import *
 from icevision.imports import *
 from icevision.models.utils import *
+from .detection_dataloaders import _img_tensor, _img_meta, _labels, _bboxes
+from mmdet.core import BitmapMasks
 
 
 def train_dl(dataset, batch_tfms=None, **dataloader_kwargs) -> DataLoader:
@@ -50,32 +52,34 @@ def infer_dl(dataset, batch_tfms=None, **dataloader_kwargs) -> DataLoader:
     )
 
 
+def build_valid_batch(
+    records: Sequence[RecordType], batch_tfms=None
+) -> Tuple[dict, List[Dict[str, torch.Tensor]]]:
+    return build_train_batch(records=records, batch_tfms=batch_tfms)
+
+
 def build_train_batch(
     records: Sequence[RecordType], batch_tfms=None
 ) -> Tuple[dict, List[Dict[str, torch.Tensor]]]:
     records = common_build_batch(records=records, batch_tfms=batch_tfms)
 
-    images, labels, bboxes, img_metas = [], [], [], []
+    images, labels, bboxes, masks, img_metas = [], [], [], [], []
     for record in records:
         images.append(_img_tensor(record))
-        img_metas.append(_img_meta(record))
+        img_metas.append(_img_meta_mask(record))
         labels.append(_labels(record))
         bboxes.append(_bboxes(record))
+        masks.append(_masks(record))
 
     data = {
         "img": torch.stack(images),
         "img_metas": img_metas,
         "gt_labels": labels,
         "gt_bboxes": bboxes,
+        "gt_masks": masks,
     }
 
     return data, records
-
-
-def build_valid_batch(
-    records: Sequence[RecordType], batch_tfms=None
-) -> Tuple[dict, List[Dict[str, torch.Tensor]]]:
-    return build_train_batch(records=records, batch_tfms=batch_tfms)
 
 
 def build_infer_batch(records, batch_tfms=None):
@@ -84,7 +88,7 @@ def build_infer_batch(records, batch_tfms=None):
     imgs, img_metas = [], []
     for record in records:
         imgs.append(_img_tensor(record))
-        img_metas.append(_img_meta(record))
+        img_metas.append(_img_meta_mask(record))
 
     data = {
         "img": [torch.stack(imgs)],
@@ -94,31 +98,16 @@ def build_infer_batch(records, batch_tfms=None):
     return data, records
 
 
-def _img_tensor(record):
-    return im2tensor(record["img"])
+def _img_meta_mask(record):
+    img_meta = _img_meta(record)
+    img_meta["ori_shape"] = img_meta["pad_shape"]
+    return img_meta
 
 
-def _img_meta(record):
-    img_h, img_w, img_c = record["img"].shape
-
-    return {
-        # height and width from sample is before padding
-        "img_shape": (record["height"], record["width"], img_c),
-        "pad_shape": (img_h, img_w, img_c),
-        "scale_factor": np.ones(4),  # TODO: is scale factor correct?
-    }
-
-
-def _labels(record):
-    if len(record["labels"]) == 0:
+def _masks(record):
+    if len(record["masks"]) == 0:
         raise RuntimeError("Negative samples still needs to be implemented")
     else:
-        return tensor(record["labels"], dtype=torch.int64)
-
-
-def _bboxes(record):
-    if len(record["labels"]) == 0:
-        raise RuntimeError("Negative samples still needs to be implemented")
-    else:
-        xyxys = [bbox.xyxy for bbox in record["bboxes"]]
-        return tensor(xyxys, dtype=torch.float32)
+        mask = record["masks"].data
+        _, h, w = mask.shape
+        return BitmapMasks(mask, height=h, width=w)

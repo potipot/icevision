@@ -1,6 +1,6 @@
-from icevision.models.mmdetection_models.detection_dataloaders import *
+from icevision.models.mmdetection_models.mask_dataloaders import *
 from icevision.models.mmdetection_models.prediction import (
-    bbox_convert_raw_prediction as convert_raw_prediction,
+    mask_convert_raw_prediction as convert_raw_prediction,
 )
 
 # Soft dependencies
