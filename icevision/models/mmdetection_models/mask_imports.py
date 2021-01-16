@@ -1,7 +1,6 @@
 from icevision.models.mmdetection_models.mask_dataloaders import *
-from icevision.models.mmdetection_models.prediction import (
-    mask_convert_raw_prediction as convert_raw_prediction,
-)
+from icevision.models.mmdetection_models.prediction import *
+from icevision.models.mmdetection_models.show_results import *
 
 # Soft dependencies
 from icevision.soft_dependencies import SoftDependencies
