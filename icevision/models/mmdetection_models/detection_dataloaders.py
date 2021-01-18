@@ -95,7 +95,9 @@ def build_infer_batch(records, batch_tfms=None):
 
 
 def _img_tensor(record):
-    return im2tensor(record["img"])
+    # convert from RGB to BGR
+    img = record["img"][:, :, ::-1].copy()
+    return im2tensor(img)
 
 
 def _img_meta(record):
