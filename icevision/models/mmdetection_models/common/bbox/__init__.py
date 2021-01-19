@@ -1,6 +1,6 @@
-from icevision.models.mmdetection_models.mask_dataloaders import *
-from icevision.models.mmdetection_models.prediction import *
-from icevision.models.mmdetection_models.show_results import *
+from icevision.models.mmdetection_models.common.bbox.dataloaders import *
+from icevision.models.mmdetection_models.common.bbox.prediction import *
+from icevision.models.mmdetection_models.common.bbox.show_results import *
 
 # Soft dependencies
 from icevision.soft_dependencies import SoftDependencies

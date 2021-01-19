@@ -1,9 +1,4 @@
-__all__ = [
-    "predict",
-    "predict_dl",
-    "bbox_convert_raw_prediction",
-    "mask_convert_raw_prediction",
-]
+__all__ = ["predict", "predict_dl", "convert_raw_prediction", "convert_raw_predictions"]
 
 from icevision.imports import *
 from icevision.utils import *
@@ -22,9 +17,7 @@ def predict(
     batch["img"] = [img.cuda() for img in batch["img"]]
 
     raw_pred = model(return_loss=False, rescale=False, **batch)
-    return mask_convert_raw_predictions(
-        raw_pred, detection_threshold=detection_threshold
-    )
+    return convert_raw_predictions(raw_pred, detection_threshold=detection_threshold)
 
 
 def predict_dl(
@@ -39,38 +32,16 @@ def predict_dl(
     )
 
 
-def mask_convert_raw_prediction(
-    raw_pred: Sequence[np.ndarray], detection_threshold: float
-):
-    raw_bboxes, raw_masks = raw_pred
-    scores, labels, bboxes = _unpack_raw_bboxes(raw_bboxes)
-
-    keep_mask = scores > detection_threshold
-    keep_scores = scores[keep_mask]
-    keep_labels = labels[keep_mask]
-    keep_bboxes = [BBox.from_xyxy(*o) for o in bboxes[keep_mask]]
-    keep_masks = MaskArray(np.vstack(raw_masks)[keep_mask])
-
-    return {
-        "scores": keep_scores,
-        "labels": keep_labels,
-        "bboxes": keep_bboxes,
-        "masks": keep_masks,
-    }
-
-
-def mask_convert_raw_predictions(
+def convert_raw_predictions(
     raw_preds: Sequence[Sequence[np.ndarray]], detection_threshold: float
 ):
     return [
-        mask_convert_raw_prediction(raw_pred, detection_threshold=detection_threshold)
+        convert_raw_prediction(raw_pred, detection_threshold=detection_threshold)
         for raw_pred in raw_preds
     ]
 
 
-def bbox_convert_raw_prediction(
-    raw_pred: Sequence[np.ndarray], detection_threshold: float
-):
+def convert_raw_prediction(raw_pred: Sequence[np.ndarray], detection_threshold: float):
     scores, labels, bboxes = _unpack_raw_bboxes(raw_pred)
 
     keep_mask = scores > detection_threshold

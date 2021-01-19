@@ -1,7 +1,7 @@
 __all__ = ["learner"]
 
 from icevision.imports import *
-from icevision.models import mmdetection_models
+from icevision.models.mmdetection_models.common import loss_fn
 from icevision.models.mmdetection_models.fastai.callbacks import *
 from icevision.engines.fastai import *
 
@@ -30,7 +30,7 @@ def learner(
         dls=dls,
         model=model,
         cbs=cbs,
-        loss_func=mmdetection_models.loss_fn,
+        loss_func=loss_fn,
         **learner_kwargs,
     )
 

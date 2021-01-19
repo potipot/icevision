@@ -7,11 +7,16 @@ __all__ = [
     "infer_dl",
 ]
 
+from mmdet.core import BitmapMasks
 from icevision.core import *
 from icevision.imports import *
 from icevision.models.utils import *
-from .detection_dataloaders import _img_tensor, _img_meta, _labels, _bboxes
-from mmdet.core import BitmapMasks
+from icevision.models.mmdetection_models.common.bbox.dataloaders import (
+    _img_tensor,
+    _img_meta,
+    _labels,
+    _bboxes,
+)
 
 
 def train_dl(dataset, batch_tfms=None, **dataloader_kwargs) -> DataLoader:

@@ -1,1 +1,1 @@
-from icevision.models.mmdetection_models.detection_imports import *
+from icevision.models.mmdetection_models.common.bbox import *

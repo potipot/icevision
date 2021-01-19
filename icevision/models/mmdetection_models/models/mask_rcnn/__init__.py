@@ -1,1 +1,1 @@
-from icevision.models.mmdetection_models.mask_imports import *
+from icevision.models.mmdetection_models.common.mask import *
