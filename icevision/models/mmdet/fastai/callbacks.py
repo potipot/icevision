@@ -14,13 +14,9 @@ class _ModelWrap(nn.Module):
 
 
 class MMDetectionCallback(fastai.Callback):
-    def before_fit(self):
+    def after_create(self):
         self.learn.model = _ModelWrap(self.model)
 
-    def after_fit(self):
-        self.learn.model = self.model.model
-
     def before_batch(self):
-        # self.learn.xb = self.xb[0]
         self.learn.records = self.yb[0]
         self.learn.yb = self.xb
