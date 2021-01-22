@@ -126,7 +126,7 @@ def voc_class_map():
         }
     )
 
-    return ClassMap(classes=classes, background=0)
+    return ClassMap(classes=classes)
 
 
 @pytest.fixture(scope="session")
@@ -237,7 +237,7 @@ def keypoints_img_128372():
 def via_bbox_class_map():
     classes = sorted({"z", "c", "n", "o"})
 
-    return ClassMap(classes=classes, background=0)
+    return ClassMap(classes=classes)
 
 
 @pytest.fixture(scope="session")
