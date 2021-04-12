@@ -31,3 +31,5 @@ if SoftDependencies.yolov5:
 
     matplotlib.use(backend)
     matplotlib.rcdefaults()
+
+from icevision.models import nvidia_nemo

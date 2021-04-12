@@ -5,6 +5,7 @@ __all__ = [
     "get_img_size",
     "show_img",
     "plot_grid",
+    "figure2ndarray",
 ]
 
 from icevision.imports import *
@@ -72,3 +73,14 @@ def plot_grid(
     plt.tight_layout()
     if show:
         plt.show()
+
+
+def figure2ndarray(fig):
+    """Converts matplotlib figure object to PIL Image for easier logging. Writing to buffer is necessary
+    to avoid wandb cutting our labels off. Wandb autoconvert doesn't pass the `bbox_inches` parameter so we need
+    to do this manually."""
+    buf = io.BytesIO()
+    fig.savefig(buf, bbox_inches="tight", dpi=150)
+    buf.seek(0)
+    rgb_pil_image = PIL.Image.open(buf).convert("RGB")
+    return np.array(rgb_pil_image)

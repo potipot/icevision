@@ -15,6 +15,9 @@ __all__ = [
     "KeyPointsRecordComponent",
     "ScoresRecordComponent",
     "LossesRecordComponent",
+    "WaveformFilepathRecordComponent",
+    "WaveformRecordComponent",
+    "TextlabelsRecordComponent",
 ]
 
 from icevision.imports import *
@@ -490,3 +493,106 @@ class LossesRecordComponent(RecordComponent):
 
     def set_losses(self, losses: Dict):
         self.losses = losses
+
+
+class BaseFilepathRecordComponent(RecordComponent):
+    def set_filepath(self, filepath: Union[str, Path]):
+        self.filepath = Path(filepath)
+
+    def _load(self):
+        raise NotImplementedError
+
+    def _unload(self):
+        raise NotImplementedError
+
+    def _autofix(self) -> Dict[str, bool]:
+        exists = self.filepath.exists()
+        if not exists:
+            raise AutofixAbort(f"File '{self.filepath}' does not exist")
+
+        has_data = self.filepath.stat().st_size > 0
+        if not has_data:
+            raise AutofixAbort(f"File '{self.filepath}' exists but is empty")
+        return super()._autofix()
+
+    def _repr(self) -> List[str]:
+        return [f"Filepath: {self.filepath}", *super()._repr()]
+
+    def as_dict(self) -> dict:
+        return {"filepath": self.filepath, **super().as_dict()}
+
+    def _builder_template(self) -> List[str]:
+        return ["record{task}set_filepath(<Union[str, Path]>)"]
+
+
+class WaveformFilepathRecordComponent(BaseFilepathRecordComponent):
+    def _load(self):
+        waveform, sample_rate = torchaudio.load(self.filepath)
+        self.wav = waveform
+        self.sr = sample_rate
+        self.duration = len(waveform) / sample_rate
+
+    def _unload(self):
+        self.wav = None
+        self.sr = None
+        self.duration = None
+
+    def set_filepath(self, filepath: Union[str, Path]):
+        super().set_filepath(filepath)
+        # FIXME: this is prone to error, no autofix before here
+        # singalinfo, encodinginfo = torchaudio.info(filepath)
+        # self.sr = singalinfo.rate
+        # self.channels = singalinfo.channels
+        # self.length = singalinfo.length
+
+    def set_duration(self, duration):
+        self.duration = duration
+
+    def _repr(self) -> List[str]:
+        return [f"Audio duration [s]: {self.duration}", *super()._repr()]
+
+    def _builder_template(self) -> List[str]:
+        return ["record{task}set_duration(<float>)", *super()._builder_template()]
+
+
+class WaveformRecordComponent(RecordComponent):
+    @property
+    def img(self):
+        waveform = self.composite.wav
+        sample_rate = self.composite.sr
+        figure, ax = plt.subplots(1)
+        num_channels, num_frames = waveform.shape
+        time_axis = torch.arange(0, num_frames) / sample_rate
+
+        ax.plot(time_axis, waveform.squeeze(), linewidth=1)
+        ax.grid(True)
+        plt.close()
+        # plt.show(block=False)
+        return figure2ndarray(figure)
+
+
+class TextlabelsRecordComponent(ClassMapRecordComponent):
+    def __init__(self, task=tasks.asr):
+        super().__init__(task=task)
+        self.text: str = ""
+        self.text_encoded: List[Hashable] = []
+
+    def set_text(self, text: str):
+        self.text = text
+        self.text_encoded = self._encode_text(text)
+
+    def _encode_text(self, text):
+        return [self.class_map.get_by_name(char) for char in text]
+
+    def _repr(self) -> List[str]:
+        return [
+            *super()._repr(),
+            f"Text: {self.text}",
+            f"Text encoded: {self.text_encoded}",
+        ]
+
+    def as_dict(self) -> dict:
+        return {"text": self.text, "text_encoded": self.text_encoded}
+
+    def _builder_template(self) -> List[str]:
+        return ["record{task}set_text(<str>)"]

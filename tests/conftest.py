@@ -422,3 +422,115 @@ def check_attributes_on_component():
             assert getattr(task_subfield, name) is getattr(component, name)
 
     return _inner
+
+
+def convert_nemo_manifest_relative_paths_to_absolute(subset_dir, tmp_path_factory):
+    relative_manifest = subset_dir / "manifest.json"
+    absolute_manifest = tmp_path_factory.mktemp("data") / "manifest.json"
+    with open(relative_manifest) as infile:
+        data = [json.loads(line) for line in infile.readlines()]
+    for entry in data:
+        entry["audio_filepath"] = str(subset_dir / entry["audio_filepath"])
+    with open(absolute_manifest, "w") as outfile:
+        for entry in data:
+            outfile.write(json.dumps(entry) + "\n")
+    return absolute_manifest
+
+
+@pytest.fixture(scope="session")
+def google_subset_manifest(samples_source, tmp_path_factory):
+    # need to convert relative paths to absolute cause otherwise nemo parser will fail
+    subset_dir = samples_source / "audio/google_speech_recognition_subset"
+    return convert_nemo_manifest_relative_paths_to_absolute(
+        subset_dir, tmp_path_factory
+    )
+
+
+@pytest.fixture(scope="session")
+def nemo_asr_manifest(samples_source, tmp_path_factory):
+    # need to convert relative paths to absolute cause otherwise nemo parser will fail
+    subset_dir = samples_source / "audio/nemo_asr_manifest"
+    return convert_nemo_manifest_relative_paths_to_absolute(
+        subset_dir, tmp_path_factory
+    )
+
+
+@pytest.fixture
+def gsr_class_map():
+    labels = [
+        "bed",
+        "bird",
+        "cat",
+        "dog",
+        "down",
+        "eight",
+        "five",
+        "four",
+        "go",
+        "happy",
+        "house",
+        "left",
+        "marvin",
+        "nine",
+        "no",
+        "off",
+        "on",
+        "one",
+        "right",
+        "seven",
+        "sheila",
+        "six",
+        "stop",
+        "three",
+        "tree",
+        "two",
+        "up",
+        "wow",
+        "yes",
+        "zero",
+    ]
+    return ClassMap(labels, background=None)
+
+
+@pytest.fixture
+def nemo_asr_class_map():
+    labels = [
+        "-",
+        " ",
+        "a",
+        "ą",
+        "b",
+        "c",
+        "ć",
+        "d",
+        "e",
+        "ę",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "ł",
+        "m",
+        "n",
+        "ń",
+        "o",
+        "ó",
+        "p",
+        "q",
+        "r",
+        "s",
+        "ś",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "ź",
+        "ż",
+    ]
+    return ClassMap(labels)

@@ -67,6 +67,9 @@ if SoftDependencies.wandb:
     import wandb
 
 
+import torchaudio
+
+
 # TODO: Stop importing partial from fastcore and move this to utils
 class partial:
     """Wraps functools.partial, same functionality.

@@ -1,0 +1,152 @@
+[
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_1",
+        "model_version": "some_model",
+        "score": 0.09090909090909091,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "przeszed\u0142 dwie ulice zn\u00f3w to samo"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/mozilla/clips/common_voice_pl_20640705.mp3"
+    }
+  },
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_2",
+        "model_version": "some_model",
+        "score": 0.05263157894736842,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "wygl\u0105da\u0142 jak zawsze"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/mozilla/clips/common_voice_pl_20684059.mp3"
+    }
+  },
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_3",
+        "model_version": "some_model",
+        "score": 0.043478260869565216,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "traktowa\u0142a familia jako swoj\u0105 absolutn\u0105 domen\u0119"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/clarin_split/SES0177_ses_sent009_bndl_3.wav"
+    }
+  },
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_4",
+        "model_version": "some_model",
+        "score": 0.047619047619047616,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "dzi\u015b s\u0105 moje urodziny"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/mozilla/clips/common_voice_pl_20612938.mp3"
+    }
+  },
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_5",
+        "model_version": "some_model",
+        "score": 0.08333333333333333,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "ale co z tob\u0105 si\u0119 stanie"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/mozilla/clips/common_voice_pl_22248794.mp3"
+    }
+  },
+  {
+    "annotations": [],
+    "predictions": [
+      {
+        "id": "prediction_6",
+        "model_version": "some_model",
+        "score": 0.5,
+        "result": [
+          {
+            "value": {
+              "text": [
+                "jest to ma\u0142y"
+              ]
+            },
+            "from_name": "transcription",
+            "to_name": "audio",
+            "type": "textarea"
+          }
+        ]
+      }
+    ],
+    "data": {
+      "audio": "/data/local-files/?d=home/toucan/Datasets/audio/clarin_split/SES0465_ses_sent15_bndl_0.wav"
+    }
+  }
+]
