@@ -13,3 +13,8 @@ def test_fail_build_train_batch(audio_records):
 def test_nemo_asr_train_dl(audio_single_dataloader):
     train_dl = audio_single_dataloader
     batch = first(train_dl)
+
+
+def test_nemo_asr_train_dl(audio_single_dataloader):
+    train_dl = audio_single_dataloader
+    batch = first(train_dl)

@@ -36,7 +36,7 @@ def audio_single_dataloader(audio_records):
 @pytest.fixture
 def pretrained_model():
     return nvidia_nemo.model(
-        model_name="commandrecognition_en_matchboxnet3x1x64_v1",
+        # model_name="commandrecognition_en_matchboxnet3x1x64_v1",
         device=torch.device("cpu"),
     )
 
@@ -44,7 +44,7 @@ def pretrained_model():
 @pytest.fixture
 def scratch_model():
     return nvidia_nemo.model(
-        model_name="commandrecognition_en_matchboxnet3x1x64_v1",
+        # model_name="commandrecognition_en_matchboxnet3x1x64_v1",
         device=torch.device("cpu"),
         pretrained=False,
     )

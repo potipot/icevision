@@ -1,18 +1,18 @@
-__all__ = ["model"]
+__all__ = ["model", "list_available_models"]
 
 import logging
+
 from icevision.imports import *
 from icevision.utils import *
-from icevision.models.nvidia_nemo.utils import get_model_config
 
 from nemo.collections.asr.models import EncDecClassificationModel
 from nemo.core import Exportable
-from omegaconf import OmegaConf
 
 
 class ModelWrapper(EncDecClassificationModel):
     """
     This wrapper is necessary to support explicit kwargs call to forward method which is required by nemo.
+    Nemo accuracy is removed due to torch version mismatch (1.8.1 required)
     It also adds a param_groups method required by fastai.
     """
 
@@ -53,13 +53,17 @@ class ModelWrapper(EncDecClassificationModel):
     def num_weights(self):
         return -1
 
-
-def list_available_models():
-    return ModelWrapper.list_available_models()
+    @classmethod
+    def from_scratch(cls, model_name):
+        cfg = cls.from_pretrained(model_name=model_name).to_config_dict()
+        cfg.test_ds.manifest_filepath = None
+        cfg.validation_ds.manifest_filepath = None
+        cfg.train_ds.manifest_filepath = None
+        return cls.from_config_dict(cfg)
 
 
 def model(
-    model_name: str = "commandrecognition_en_matchboxnet3x1x64_v1",
+    model_name: str = "MatchboxNet-3x2x64-v1",
     num_classes: int = 30,
     # TODO: img_size: int,
     pretrained: bool = True,
@@ -72,11 +76,13 @@ def model(
     if pretrained == True:
         model = ModelWrapper.from_pretrained(model_name=model_name, map_location=device)
     else:
-        config_file = get_model_config(model_name)
-        config = OmegaConf.load(config_file)
-        model = ModelWrapper(cfg=config.model)
+        model = ModelWrapper.from_scratch(model_name=model_name)
     if num_classes != 30:
         model.change_labels([""] * num_classes)
 
     logging.getLogger("nemo_logger").setLevel(original_level)
     return model
+
+
+def list_available_models():
+    return ModelWrapper.list_available_models()
