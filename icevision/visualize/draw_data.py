@@ -32,6 +32,7 @@ def draw_sample(
     display_score: bool = True,
     display_mask: bool = True,
     display_keypoints: bool = True,
+    display_text: bool = True,
     font_path: Optional[os.PathLike] = DEFAULT_FONT_PATH,
     font_size: Union[int, float] = 12,
     label_color: Union[np.array, list, tuple, str] = "#C4C4C4",  # Mild Gray
@@ -87,11 +88,22 @@ def draw_sample(
         else:
             masks = []
 
-        for label, bbox, mask, keypoints, score in itertools.zip_longest(
+        # ULTRAHACK to support the below drawing API
+        if hasattr(composite, "text"):
+            # otherwise zip iterates over string char by char
+            text = [composite.text]
+            # fooling label_str conversion here
+            composite.labels = [[]]
+            display_label = False
+        else:
+            text = []
+
+        for label, bbox, mask, keypoints, text, score in itertools.zip_longest(
             getattr(composite, "labels", []),  # list of strings
             getattr(composite, "bboxes", []),
             masks,
             getattr(composite, "keypoints", []),
+            text,
             getattr(composite, "scores", []),
         ):
             # random color by default
@@ -126,6 +138,16 @@ def draw_sample(
                 img = draw_bbox(img=img, bbox=bbox, color=color)
             if display_keypoints and keypoints is not None:
                 img = draw_keypoints(img=img, kps=keypoints, color=color)
+            if display_text and text is not None:
+                img = _draw_label(
+                    img=img,
+                    caption=text,
+                    x=0,
+                    y=0,
+                    color=color,
+                    border_color=label_border_color,
+                    font_size=30,
+                )
             if display_label and label is not None:
                 img = draw_label(
                     img=img,
