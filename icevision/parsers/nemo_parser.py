@@ -26,7 +26,7 @@ class NemoBaseParser(Parser):
                 yield json.loads(line)
 
     def record_id(self, o) -> Hashable:
-        return Path(o["audio_filepath"]).stem
+        return hash(o["audio_filepath"])
 
     @abstractmethod
     def template_record(self):
