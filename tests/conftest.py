@@ -424,35 +424,14 @@ def check_attributes_on_component():
     return _inner
 
 
-def convert_nemo_manifest_relative_paths_to_absolute(subset_dir, tmp_path_factory):
-    relative_manifest = subset_dir / "manifest.json"
-    absolute_manifest = tmp_path_factory.mktemp("data") / "manifest.json"
-    with open(relative_manifest) as infile:
-        data = [json.loads(line) for line in infile.readlines()]
-    for entry in data:
-        entry["audio_filepath"] = str(subset_dir / entry["audio_filepath"])
-    with open(absolute_manifest, "w") as outfile:
-        for entry in data:
-            outfile.write(json.dumps(entry) + "\n")
-    return absolute_manifest
+@pytest.fixture(scope="session")
+def google_subset_manifest(samples_source):
+    return samples_source / "audio/google_speech_recognition_subset/manifest.json"
 
 
 @pytest.fixture(scope="session")
-def google_subset_manifest(samples_source, tmp_path_factory):
-    # need to convert relative paths to absolute cause otherwise nemo parser will fail
-    subset_dir = samples_source / "audio/google_speech_recognition_subset"
-    return convert_nemo_manifest_relative_paths_to_absolute(
-        subset_dir, tmp_path_factory
-    )
-
-
-@pytest.fixture(scope="session")
-def nemo_asr_manifest(samples_source, tmp_path_factory):
-    # need to convert relative paths to absolute cause otherwise nemo parser will fail
-    subset_dir = samples_source / "audio/nemo_asr_manifest"
-    return convert_nemo_manifest_relative_paths_to_absolute(
-        subset_dir, tmp_path_factory
-    )
+def nemo_asr_manifest(samples_source):
+    return samples_source / "audio/nemo_asr_manifest/manifest.json"
 
 
 @pytest.fixture

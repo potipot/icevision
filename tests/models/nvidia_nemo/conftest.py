@@ -3,9 +3,25 @@ from icevision.all import *
 
 
 @pytest.fixture(params=([0.8, 0.2], [0.5, 0.5]))
-def audio_records(google_subset_manifest, gsr_class_map, request):
+def speech_commands_records(google_subset_manifest, gsr_class_map, request):
     audio_parser = parsers.NemoSpeechCommandsParser(
-        google_subset_manifest, gsr_class_map, google_subset_manifest.parent
+        manifest_filepath=google_subset_manifest,
+        class_map=gsr_class_map,
+        image_dir=google_subset_manifest.parent,
+    )
+    splits = request.param
+    train_records, valid_records = audio_parser.parse(
+        data_splitter=RandomSplitter(splits), autofix=False
+    )
+    return train_records, valid_records
+
+
+@pytest.fixture(params=([0.8, 0.2], [0.5, 0.5]))
+def asr_records(nemo_asr_manifest, nemo_asr_class_map, request):
+    audio_parser = parsers.NemoASRParser(
+        manifest_filepath=nemo_asr_manifest,
+        class_map=nemo_asr_class_map,
+        image_dir=nemo_asr_manifest.parent / "data",
     )
     splits = request.param
     train_records, valid_records = audio_parser.parse(
@@ -15,8 +31,8 @@ def audio_records(google_subset_manifest, gsr_class_map, request):
 
 
 @pytest.fixture
-def audio_dataloaders(audio_records):
-    train_records, valid_records = audio_records
+def audio_dataloaders(speech_commands_records):
+    train_records, valid_records = speech_commands_records
 
     train_dataset = Dataset(train_records, tfm=None)
     valid_dataset = Dataset(valid_records, tfm=None)
@@ -27,8 +43,8 @@ def audio_dataloaders(audio_records):
 
 
 @pytest.fixture
-def audio_single_dataloader(audio_records):
-    train_records, valid_records = audio_records
+def audio_single_dataloader(speech_commands_records):
+    train_records, valid_records = speech_commands_records
     dataset = Dataset(train_records + valid_records, tfm=None)
     return nvidia_nemo.train_dl(dataset, batch_size=3, num_workers=0)
 

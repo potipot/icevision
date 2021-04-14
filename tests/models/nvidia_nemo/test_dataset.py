@@ -2,8 +2,8 @@ import pytest
 from icevision.all import *
 
 
-def test_build_dataset(audio_records):
-    train_records, valid_records = audio_records
+def test_build_dataset(speech_commands_records):
+    train_records, valid_records = speech_commands_records
     dataset = Dataset(train_records)
 
     sample = first(dataset)

@@ -2,9 +2,9 @@ import pytest
 from icevision.all import *
 
 
-def test_fail_build_train_batch(audio_records):
+def test_fail_build_train_batch(speech_commands_records):
     # should fail cause wasn't wrapped in Dataset and audio file was not loaded in getitem, therefore shape is invalid
-    train_records, _ = audio_records
+    train_records, _ = speech_commands_records
     with pytest.raises(AttributeError) as excinfo:
         (waves, targets), records = nvidia_nemo.build_train_batch(train_records)
     assert first(excinfo.value.args) == "'NoneType' object has no attribute 'shape'"
