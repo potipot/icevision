@@ -496,14 +496,13 @@ class LossesRecordComponent(RecordComponent):
 
 
 class BaseFilepathRecordComponent(RecordComponent):
+    # TODO: merge with ImageFilepathRecordComponent
+    def __init__(self, task):
+        super().__init__(task=task)
+        self.filepath: Path = Path("")
+
     def set_filepath(self, filepath: Union[str, Path]):
         self.filepath = Path(filepath)
-
-    def _load(self):
-        raise NotImplementedError
-
-    def _unload(self):
-        raise NotImplementedError
 
     def _autofix(self) -> Dict[str, bool]:
         exists = self.filepath.exists()
@@ -526,16 +525,23 @@ class BaseFilepathRecordComponent(RecordComponent):
 
 
 class WaveformFilepathRecordComponent(BaseFilepathRecordComponent):
-    def _load(self):
-        waveform, sample_rate = torchaudio.load(self.filepath)
-        self.wav = waveform
-        self.sr = sample_rate
-        self.duration = len(waveform) / sample_rate
-
-    def _unload(self):
+    def __init__(self, task=tasks.common):
+        super().__init__(task)
         self.wav = None
         self.sr = None
         self.duration = None
+
+    def _load(self):
+        waveform, sample_rate = torchaudio.load(self.filepath)
+        duration = len(waveform) / sample_rate
+        self.set_wav(waveform)
+        self.set_sr(sample_rate)
+        self.set_duration(duration)
+
+    def _unload(self):
+        self.set_wav(None)
+        # self.set_sr(None)
+        # self.set_duration(None)
 
     def set_filepath(self, filepath: Union[str, Path]):
         super().set_filepath(filepath)
@@ -547,6 +553,12 @@ class WaveformFilepathRecordComponent(BaseFilepathRecordComponent):
 
     def set_duration(self, duration):
         self.duration = duration
+
+    def set_wav(self, wav):
+        self.wav = wav
+
+    def set_sr(self, sr):
+        self.sr = sr
 
     def _repr(self) -> List[str]:
         return [f"Audio duration [s]: {self.duration}", *super()._repr()]

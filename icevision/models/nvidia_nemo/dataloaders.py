@@ -63,11 +63,15 @@ def build_train_batch(
     """
 
     def record_to_audiolabeldataset_output(record):
+        # squeezing here cause nemo accepts only single channel data
+        n_channels, audio_length = record.wav.shape
+        assert n_channels == 1
+
         audio_signal = record.wav.squeeze()
-        assert audio_signal.ndim == 1
-        audio_length = torch.tensor(record.wav.shape[-1])
+        audio_length = torch.tensor(audio_length)
         token = torch.tensor(record.classification.label_ids).squeeze()
         token_length = torch.tensor(1)
+
         return audio_signal, audio_length, token, token_length
 
     batch = [record_to_audiolabeldataset_output(record) for record in records]
