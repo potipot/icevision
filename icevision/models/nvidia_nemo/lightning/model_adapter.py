@@ -36,10 +36,12 @@ class ModelAdapter(LightningModelAdapter, ABC):
             input_signal=audio_signal, input_signal_length=input_signal_length
         )
 
-        training_loss = self.model.loss(logits=logits, labels=labels)
+        loss = self.model.loss(logits=logits, labels=labels)
         self.training_accuracy(preds=logits, target=labels)
-        self.log("loss", training_loss, prog_bar=True)
+        self.log("training_loss", loss.detach())
         self.log("training_accuracy", self.training_accuracy)
+
+        return loss
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         (audio_signal, audio_signal_len, labels, labels_len), records = batch
