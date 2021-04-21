@@ -4,12 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+### Changed
+### Deleted
+
+## [0.7.0]
 **BREAKING:** API Refactor
 
-## Added
+### Added
 - Metrics for mmdetection models
 
-## Changed
+### Changed
 - **Breaking:** Renamed tasks `default,detect,classif` to `common,detection,classification`
 - **Breaking:** Renamed `imageid` to `record_id`
 - **Breaking:** Added parameter `is_new` to `Parser.parse_fields`
@@ -24,11 +29,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - pass in a dictionary mapping labels to specific colors
   - control label height & width padding from bbox edge
   - add border around label for legibility (color is a parameter)
+
 **Breaking:**: Rename `labels->label_ids`, `labels_names->labels` in `LabelsRecordComponent`
 - Renamed torchvision resnet backbones:
   - resnet_fpn.resnet18 -> resnet18_fpn
   - resnest_fpn.resnest18 -> resnest18_fpn
+
 **Breaking:** Added parameters `sample` and `keep_image` to `convert_raw_prediction`
+**Breaking:** Renamed `VocXmlParser` to `VOCBBoxParser` and `VocMaskParser` to `VOCMaskParser`
+**Breaking:** Renamed `predict_dl` to `predict_from_dl`
 
 
 ## [0.6.0b1]
