@@ -35,9 +35,10 @@ class ModelAdapter(LightningModelAdapter, ABC):
         logits = self.forward(
             input_signal=audio_signal, input_signal_length=input_signal_length
         )
+        preds = torch.softmax(logits, 1)
 
         loss = self.model.loss(logits=logits, labels=labels)
-        self.training_accuracy(preds=logits, target=labels)
+        self.training_accuracy(preds=preds, target=labels)
         self.log("training_loss", loss.detach())
         self.log("training_accuracy", self.training_accuracy)
 
@@ -48,9 +49,10 @@ class ModelAdapter(LightningModelAdapter, ABC):
         logits = self.forward(
             input_signal=audio_signal, input_signal_length=audio_signal_len
         )
+        preds = torch.softmax(logits, 1)
 
         validation_loss = self.model.loss(logits=logits, labels=labels)
-        self.validation_accuracy(preds=logits, target=labels)
+        self.validation_accuracy(preds=preds, target=labels)
         self.log("validation_loss", validation_loss)
         self.log("validation_accuracy", self.validation_accuracy)
 
@@ -59,8 +61,9 @@ class ModelAdapter(LightningModelAdapter, ABC):
         logits = self.forward(
             input_signal=audio_signal, input_signal_length=audio_signal_len
         )
+        preds = torch.softmax(logits, 1)
 
         test_loss = self.model.loss(logits=logits, labels=labels)
-        self.validation_accuracy(preds=logits, target=labels)
+        self.validation_accuracy(preds=preds, target=labels)
         self.log("test_loss", test_loss)
         self.log("test_accuracy", self.validation_accuracy)

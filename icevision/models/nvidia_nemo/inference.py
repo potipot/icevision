@@ -2,7 +2,8 @@ __all__ = ["predict_single_item_onnx", "predict_torchscript"]
 
 import tempfile
 import soundfile
-import onnxruntime
+
+# import onnxruntime
 from icevision.imports import *
 from icevision.core import *
 
