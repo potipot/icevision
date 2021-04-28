@@ -533,6 +533,12 @@ class WaveformFilepathRecordComponent(BaseFilepathRecordComponent):
 
     def _load(self):
         waveform, sample_rate = torchaudio.load(self.filepath)
+
+        if waveform.shape[0] == 1:
+            waveform = waveform.squeeze()
+        else:
+            waveform = waveform.mean(axis=0)  # multiple channels, average
+
         duration = len(waveform) / sample_rate
         self.set_wav(waveform)
         self.set_sr(sample_rate)
