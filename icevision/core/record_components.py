@@ -579,7 +579,7 @@ class WaveformRecordComponent(RecordComponent):
         waveform = self.composite.wav
         sample_rate = self.composite.sr
         figure, ax = plt.subplots(1)
-        num_channels, num_frames = waveform.shape
+        num_frames = waveform.shape[-1]
         time_axis = torch.arange(0, num_frames) / sample_rate
 
         ax.plot(time_axis, waveform.squeeze(), linewidth=1)
