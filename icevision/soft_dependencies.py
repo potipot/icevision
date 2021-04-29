@@ -24,6 +24,7 @@ class _SoftDependencies:
         self.resnest = soft_import("resnest")
         self.mmdet = soft_import("mmdet")
         self.yolov5 = soft_import("yolov5")
+        self.sklearn = soft_import("sklearn")
         self.torchaudio = soft_import("torchaudio")
         self.nemo = soft_import("nemo")
 

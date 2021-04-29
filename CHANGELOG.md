@@ -4,8 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+Supports pytorch 1.8
 ### Added
+- `SimpleConfusionMatrix` Metric
 ### Changed
+- **Breaking:** Albumentations `aug_tfms` defaults.
+  - rotate_limit changed from 45 to 15
+  - rgb_shift_limit changed from 20 to 10
 ### Deleted
 
 ## [0.7.0]
