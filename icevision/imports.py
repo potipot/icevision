@@ -72,6 +72,8 @@ if SoftDependencies.sklearn:
 
 if SoftDependencies.nemo:
     import nemo
+
+    nemo.utils.logging.setLevel(nemo.utils.logging.ERROR)
     from nemo.collections.asr.data.audio_to_text import (
         _speech_collate_fn as nemo_speech_collate_fn,
     )
