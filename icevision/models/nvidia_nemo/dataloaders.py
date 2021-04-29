@@ -1,7 +1,6 @@
 from icevision.imports import *
 from icevision.core import *
 from icevision.models.utils import *
-from nemo.collections.asr.data.audio_to_text import _speech_collate_fn
 
 
 def train_dl(dataset, batch_tfms=None, **dataloader_kwargs) -> DataLoader:
@@ -63,11 +62,8 @@ def build_train_batch(
     """
 
     def record_to_audiolabeldataset_output(record):
-        # squeezing here cause nemo accepts only single channel data
-        n_channels, audio_length = record.wav.shape
-        assert n_channels == 1
-
-        audio_signal = record.wav.squeeze()
+        audio_length = record.wav.shape[-1]
+        audio_signal = record.wav
         audio_length = torch.tensor(audio_length)
         token = torch.tensor(record.classification.label_ids).squeeze()
         token_length = torch.tensor(1)
@@ -75,7 +71,7 @@ def build_train_batch(
         return audio_signal, audio_length, token, token_length
 
     batch = [record_to_audiolabeldataset_output(record) for record in records]
-    audio_signals, audio_lengths, tokens, tokens_lengths = _speech_collate_fn(
+    audio_signals, audio_lengths, tokens, tokens_lengths = nemo_speech_collate_fn(
         batch=batch, pad_id=0
     )
 

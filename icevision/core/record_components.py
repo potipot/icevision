@@ -597,13 +597,24 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
 
     def set_text(self, text: str):
         self.text = text
-        try:
-            self.text_encoded = self._encode_text(text)
-        except KeyError as e:
-            raise AbortParseRecord("symbol " + str(e) + " was not found in class_map")
+        self.text_encoded = self._encode_text(text)
 
     def _encode_text(self, text):
-        return [self.class_map.get_by_name(char) for char in text]
+        """Encodes text to numerical values skipping items that are missing in class_map"""
+        encoded_text = []
+        for char in text:
+            try:
+                id = self.class_map.get_by_name(char)
+                encoded_text.append(id)
+            except KeyError as e:
+                logger.log(
+                    "WARNING",
+                    "{}",
+                    "symbol "
+                    + str(e)
+                    + " was not found in class_map and will not be encoded",
+                )
+        return encoded_text
 
     def _repr(self) -> List[str]:
         return [

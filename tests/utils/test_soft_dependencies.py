@@ -21,4 +21,6 @@ def test_soft_dependencies():
         "resnest": True,
         "mmdet": True,
         "yolov5": True,
+        "torchaudio": True,
+        "nemo": True,
     }

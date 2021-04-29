@@ -66,8 +66,15 @@ if SoftDependencies.pytorch_lightning:
 if SoftDependencies.wandb:
     import wandb
 
+if SoftDependencies.nemo:
+    import nemo
+    from nemo.collections.asr.data.audio_to_text import (
+        _speech_collate_fn as nemo_speech_collate_fn,
+    )
+    from nemo.collections.asr import models as nemo_asr_models
 
-import torchaudio
+if SoftDependencies.torchaudio:
+    import torchaudio
 
 
 # TODO: Stop importing partial from fastcore and move this to utils

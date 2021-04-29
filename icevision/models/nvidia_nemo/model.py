@@ -5,11 +5,8 @@ import logging
 from icevision.imports import *
 from icevision.utils import *
 
-from nemo.collections.asr.models import EncDecClassificationModel
-from nemo.core import Exportable
 
-
-class ModelWrapper(EncDecClassificationModel):
+class ModelWrapper(nemo_asr_models.EncDecClassificationModel):
     """
     This wrapper is necessary to support explicit kwargs call to forward method which is required by nemo.
     Nemo accuracy is removed due to torch version mismatch (1.8.1 required)
@@ -47,7 +44,7 @@ class ModelWrapper(EncDecClassificationModel):
         return param_groups
 
     def export(self, *args, **kwargs):
-        return Exportable.export(self, *args, **kwargs)
+        return nemo.core.Exportable.export(self, *args, **kwargs)
 
     @property
     def num_weights(self):

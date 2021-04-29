@@ -8,5 +8,5 @@ def test_build_dataset(speech_commands_records):
 
     sample = first(dataset)
     assert isinstance(sample.wav, torch.Tensor)
-    assert sample.wav.shape == (1, 16000)
+    assert sample.wav.shape == torch.Size([16000])
     assert isinstance(sample.img, np.ndarray)
