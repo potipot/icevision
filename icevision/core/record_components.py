@@ -597,7 +597,10 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
 
     def set_text(self, text: str):
         self.text = text
-        self.text_encoded = self._encode_text(text)
+        try:
+            self.text_encoded = self._encode_text(text)
+        except KeyError as e:
+            raise AbortParseRecord("symbol " + str(e) + " was not found in class_map")
 
     def _encode_text(self, text):
         return [self.class_map.get_by_name(char) for char in text]
