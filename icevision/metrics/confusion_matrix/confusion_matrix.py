@@ -10,6 +10,7 @@ import PIL
 class MatchingPolicy(Enum):
     BEST_SCORE = 1
     BEST_IOU = 2
+    ALL = 3
 
 
 class SimpleConfusionMatrix(Metric):
@@ -41,7 +42,7 @@ class SimpleConfusionMatrix(Metric):
             # if not target_record.detection.bboxes:
             #     continue
             # create matches based on iou
-            matches = match_records(
+            matches = match_predictions_to_targets(
                 target=target_record,
                 prediction=prediction_record,
                 iou_threshold=self._iou_threshold,
@@ -144,8 +145,8 @@ class SimpleConfusionMatrix(Metric):
 
     def log(self, logger_object) -> None:
         # TODO: Disabled for now, need to design for metric logging for this to work + pl dependency
-        # if isinstance(logger_object, pl_loggers.WandbLogger):
-        #     fig = self.plot()
-        #     image = self._fig2img(fig)
-        #     logger_object.experiment.log({"Confusion Matrix": wandb.Image(image)})
+        if isinstance(logger_object, pl_loggers.WandbLogger):
+            fig = self.plot()
+            image = self._fig2img(fig)
+            logger_object.experiment.log({"Confusion Matrix": wandb.Image(image)})
         return

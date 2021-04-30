@@ -105,7 +105,7 @@ def test_pairwise_iou_matching(target, prediction):
 
 
 def test_match_prediction(target, prediction):
-    result = match_records(target, prediction, iou_threshold=0.5)
+    result = match_predictions_to_targets(target, prediction, iou_threshold=0.5)
     expected_result = [
         [
             {

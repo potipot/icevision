@@ -28,7 +28,7 @@ def pairwise_iou_record_record(target: BaseRecord, prediction: BaseRecord):
     return torchvision.ops.box_iou(stacked_preds, stacked_targets)
 
 
-def match_records(
+def match_predictions_to_targets(
     target: BaseRecord, prediction: BaseRecord, iou_threshold: float = 0.5
 ) -> Collection:
     """
@@ -70,3 +70,16 @@ def match_records(
         target_list[target_id][1].append(single_prediction)
 
     return target_list
+
+
+def match_targets_to_predictions():
+    pass
+
+
+class NoCopyRepeat(nn.Module):
+    def __init__(self, out_channels=3):
+        super().__init__()
+        self.out_channels = out_channels
+
+    def forward(self, x):
+        return x.expand(self.out_channels, -1, -1)
