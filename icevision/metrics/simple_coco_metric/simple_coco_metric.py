@@ -1,11 +1,13 @@
 __all__ = ["SimpleCOCOMetric"]
 
+import pdb
 
 from icevision.data.prediction import Prediction
 from icevision.metrics.metric import Metric
 from icevision.metrics.confusion_matrix.confusion_matrix_utils import *
 from icevision.imports import *
 import pandas as pd
+from scipy import interpolate
 
 
 def build_results_table(single_label_result, name=""):
@@ -30,14 +32,40 @@ def build_results_table(single_label_result, name=""):
 
 def auc(x: pd.Series, y: pd.Series) -> float:
     """Calculate area under curve set by x,y points using Riemann right endpoint approximation"""
-    y_increment = y.diff().fillna(y.iloc[0])
-    return np.dot(x, y_increment)
+    x_increment = x.diff().fillna(x.iloc[0])
+    return np.dot(y, x_increment)
 
 
 def auc_trapz(x, y) -> float:
     """Calculate area under curve set by x,y points using trapezoidal approximation.
     Inserting duplicate row starting from (y[0], 0.0) to approximate correctly and not from (0.0, 0.0)"""
     return np.trapz([y.iloc[0], *y], [0.0, *x])
+
+
+def auc_101_linear_interp(x: pd.Series, y: pd.Series) -> float:
+    xw = np.linspace(0, 1, 101)
+    y101 = np.interp(xw, xp=x, fp=y)
+    x101 = np.full(101, 0.01)
+    return np.dot(x101, y101)
+
+
+def auc_101_next_interp(x: pd.Series, y: pd.Series) -> float:
+    fig, ax = plt.subplots()
+    ax.scatter(x, y, marker="x")
+    last_precision = y.iloc[-1] if x.iloc[-1] == 1.0 else 0.0
+    # x = [0.0, *x, 1.0]
+    # y = [y.iloc[0], *y, last_precision]
+    x = [*x, 1.0]
+    y = [*y, last_precision]
+    interp_func = interpolate.interp1d(
+        x, y, fill_value=(y[0], y[-1]), bounds_error=False, kind="next"
+    )
+    xw = np.linspace(0, 1, 101)
+    x101 = np.full(101, 0.01)
+    y101 = interp_func(xw)
+    ax.scatter(xw, y101, marker=".")
+    ax.set_ylim([0.0, 1.0])
+    return np.dot(x101, y101)
 
 
 class SimpleCOCOMetric(Metric):
@@ -82,6 +110,7 @@ class SimpleCOCOMetric(Metric):
                     n_ground_truths=self.gt_counter[label_name],
                 )
             )
+        # pdb.set_trace()
         return np.mean(APs)
 
     @staticmethod
@@ -100,7 +129,9 @@ class SimpleCOCOMetric(Metric):
             df["precision_interpolated"] = df.apply(
                 lambda row: df.precision[df.recall >= row.recall].max(), axis=1
             )
-            ap = auc(df.precision_interpolated, df.recall)
+            # ap = auc(x=df.recall, y=df.precision_interpolated)
+            # ap = auc_101_linear_interp(x=df.recall, y=df.precision_interpolated)
+            ap = auc_101_next_interp(x=df.recall, y=df.precision_interpolated)
 
             # fig = plt.figure()
             # x = np.array(df.recall)
