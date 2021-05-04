@@ -34,8 +34,9 @@ def expected_confusion_matrix_output():
 @pytest.mark.parametrize(
     "metric, expected_output",
     [
-        (SimpleConfusionMatrix(print_summary=True), "expected_confusion_matrix_output"),
-        (COCOMetric(print_summary=True), "expected_coco_metric_output"),
+        # (SimpleConfusionMatrix(print_summary=True), "expected_confusion_matrix_output"),
+        # (COCOMetric(print_summary=True), "expected_coco_metric_output"),
+        (SimpleCOCOMetric(), "expected_coco_metric_output"),
     ],
 )
 def test_efficientdet_metrics(
