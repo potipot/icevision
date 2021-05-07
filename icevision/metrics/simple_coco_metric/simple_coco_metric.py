@@ -8,6 +8,7 @@ from icevision.metrics.confusion_matrix.confusion_matrix_utils import *
 from icevision.imports import *
 import pandas as pd
 from scipy import interpolate
+import pdb
 
 
 def build_results_table(single_label_result, name=""):
@@ -50,21 +51,37 @@ def auc_101_linear_interp(x: pd.Series, y: pd.Series) -> float:
 
 
 def auc_101_next_interp(x: pd.Series, y: pd.Series) -> float:
-    fig, ax = plt.subplots()
-    ax.scatter(x, y, marker="x")
+    # fig, ax = plt.subplots()
+    # ax.scatter(x, y, marker="x")
     last_precision = y.iloc[-1] if x.iloc[-1] == 1.0 else 0.0
-    # x = [0.0, *x, 1.0]
-    # y = [y.iloc[0], *y, last_precision]
-    x = [*x, 1.0]
-    y = [*y, last_precision]
+    option = 2
+
+    # option 1 include (0.0, y[0]) and (1.0, y[-1]) points
+    if option == 1:
+        x = [0.0, *x, 1.0]
+        y = [y.iloc[0], *y, last_precision]
+    # option 2 include (1.0, y[-1]) point
+    elif option == 2:
+        x = [*x, 1.0]
+        y = [*y, last_precision]
+    # option 3 dont add any points
+    elif option == 3:
+        x = [*x]
+        y = [*y]
+        # nasty hack for len(x) = 1
+        if len(x) == 1:
+            x = x * 2
+            y = y * 2
     interp_func = interpolate.interp1d(
         x, y, fill_value=(y[0], y[-1]), bounds_error=False, kind="next"
     )
     xw = np.linspace(0, 1, 101)
     x101 = np.full(101, 0.01)
     y101 = interp_func(xw)
-    ax.scatter(xw, y101, marker=".")
-    ax.set_ylim([0.0, 1.0])
+    # ax.scatter(xw, y101, marker=".")
+    # ax.set_ylim([0.0, 1.0])
+    # pdb.set_trace()
+    # return np.mean(y101)
     return np.dot(x101, y101)
 
 
@@ -102,7 +119,7 @@ class SimpleCOCOMetric(Metric):
                 # TODO: ignore background in mAP average calculation
             single_label_result = filter_by_label_id(label_id, self.matches)
             results_table = build_results_table(single_label_result, name=label_name)
-            iou_threshold = 0.75
+            iou_threshold = 0.5
             APs.append(
                 self.calculate_ap(
                     results_table,
@@ -110,7 +127,6 @@ class SimpleCOCOMetric(Metric):
                     n_ground_truths=self.gt_counter[label_name],
                 )
             )
-        # pdb.set_trace()
         return np.mean(APs)
 
     @staticmethod
