@@ -42,7 +42,7 @@ class SimpleConfusionMatrix(Metric):
             # if not target_record.detection.bboxes:
             #     continue
             # create matches based on iou
-            targets = match_predictions_to_targets(
+            register = match_predictions_to_targets(
                 target=target_record,
                 prediction=prediction_record,
                 iou_threshold=self._iou_threshold,
@@ -50,10 +50,10 @@ class SimpleConfusionMatrix(Metric):
 
             target_labels, predicted_labels = [], []
             # iterate over multiple targets and preds in a record
-            for target_item in targets:
+            for target_item in register:
                 if self._policy == MatchingPolicy.BEST_SCORE:
-                    predicted_item = get_best_score_item(
-                        prediction_items=target_item.matches
+                    match, iou = get_best_score_match(
+                        prediction_items=register[target_item]
                     )
                 elif self._policy == MatchingPolicy.BEST_IOU:
                     raise NotImplementedError
@@ -62,7 +62,7 @@ class SimpleConfusionMatrix(Metric):
 
                 # using label_id instead of named label to save memory
                 target_label = target_item.label_id
-                predicted_label = predicted_item.label_id
+                predicted_label = match.label_id
                 target_labels.append(target_label)
                 predicted_labels.append(predicted_label)
 

@@ -16,7 +16,7 @@ def build_results_table(single_label_result, name=""):
     iou_scores = []
     scores = []
     for prediction_item in single_label_result:
-        match = get_best_iou_item(prediction_item.matches)
+        match = get_best_iou_match(prediction_item.matches)
         is_correct_label = prediction_item.label_id == match.label_id
         iou_score = match.iou_score
         score = prediction_item.score
@@ -118,7 +118,10 @@ class SimpleCOCOMetric(Metric):
                 )
                 # TODO: ignore background in mAP average calculation
             single_label_result = filter_by_label_id(label_id, self.matches)
-            results_table = build_results_table(single_label_result, name=label_name)
+            single_label_result = sorted(
+                single_label_result, key=lambda item: item.score, reverse=True
+            )
+            results_table = build_results_table(single_label_result, name=label_id)
             iou_threshold = 0.5
             APs.append(
                 self.calculate_ap(
@@ -132,14 +135,22 @@ class SimpleCOCOMetric(Metric):
     @staticmethod
     def calculate_ap(df, iou_threshold, n_ground_truths):
         # FIXME: > or >= for iou_threshold?
+        # df.sort_values(by="score", ascending=False, inplace=True, ignore_index=True)
         df["is_true_positive"] = df.is_correct_label * df.iou_score > iou_threshold
         df["n_tps"] = df.is_true_positive.cumsum()
-        # index to start from 1
+        # index to start from 1, necessary for precision calculation
         df.index += 1
         df["precision"] = df.n_tps.to_frame().apply(
             lambda row: row.n_tps / row.name, axis=1
         )
         df["recall"] = df.n_tps / n_ground_truths
+        padilla_results = pd.read_csv(
+            f"/home/ppotrykus/Programs/map_metric_comparison/tests/outputs/{df.name}"
+        )
+        # get back to original indexing
+        df.reset_index(inplace=True, drop=True)
+        assert all(padilla_results["recall"] == df["recall"])
+        assert all(padilla_results["precision"] == df["precision"])
         if not df.empty:
             # picking the best precision for a given recall to avoid zig-zag pattern
             df["precision_interpolated"] = df.apply(
@@ -148,7 +159,6 @@ class SimpleCOCOMetric(Metric):
             # ap = auc(x=df.recall, y=df.precision_interpolated)
             # ap = auc_101_linear_interp(x=df.recall, y=df.precision_interpolated)
             ap = auc_101_next_interp(x=df.recall, y=df.precision_interpolated)
-
             # fig = plt.figure()
             # x = np.array(df.recall)
             # y = np.array(df.precision_interpolated)

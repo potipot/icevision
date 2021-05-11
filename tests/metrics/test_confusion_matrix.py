@@ -106,50 +106,53 @@ def test_pairwise_iou_matching(target, prediction):
 
 def test_match_predictions_to_targets(target, prediction):
     result = match_predictions_to_targets(target, prediction, iou_threshold=0.5)
-    expected_result = [
+    target_list = build_target_list(target)
+    register = Register(keys=target_list, allow_duplicates=True)
+    register[
         ObjectDetectionTarget(
+            record_id=0,
+            item_id=0,
             bbox=BBox.from_xyxy(100, 100, 400, 400),
             label="a",
             label_id=1,
-            matches=[
-                ObjectDetectionPrediction(
-                    bbox=BBox.from_xyxy(100, 100, 400, 400),
-                    label="a",
-                    label_id=1,
-                    score=0.8,
-                    iou_score=1.0,
-                ),
-                ObjectDetectionPrediction(
-                    bbox=BBox.from_xyxy(190, 100, 510, 400),
-                    label="b",
-                    label_id=2,
-                    score=0.7,
-                    iou_score=0.5122,
-                ),
-            ],
-        ),
+        )
+    ] = {
+        ObjectDetectionPrediction(
+            record_id=0,
+            item_id=0,
+            bbox=BBox.from_xyxy(100, 100, 400, 400),
+            label="a",
+            label_id=1,
+            score=0.8,
+        ): 1.0,
+        ObjectDetectionPrediction(
+            record_id=0,
+            item_id=1,
+            bbox=BBox.from_xyxy(190, 100, 510, 400),
+            label="b",
+            label_id=2,
+            score=0.7,
+        ): 0.5122,
+    }
+    register[
         ObjectDetectionTarget(
+            record_id=0,
+            item_id=1,
             bbox=BBox.from_xyxy(300, 100, 600, 400),
             label="b",
             label_id=2,
-            matches=[
-                ObjectDetectionPrediction(
-                    bbox=BBox.from_xyxy(190, 100, 510, 400),
-                    label="b",
-                    label_id=2,
-                    score=0.7,
-                    iou_score=0.5122,
-                ),
-            ],
-        ),
-        ObjectDetectionTarget(
-            bbox=BBox.from_xyxy(700, 200, 900, 500),
+        )
+    ] = {
+        ObjectDetectionPrediction(
+            record_id=0,
+            item_id=1,
+            bbox=BBox.from_xyxy(190, 100, 510, 400),
             label="b",
             label_id=2,
-            matches=[],
-        ),
-    ]
-    assert result == expected_result
+            score=0.7,
+        ): 0.5122
+    }
+    assert result == register
 
 
 def test_match_targets_to_predictions(target, prediction):
