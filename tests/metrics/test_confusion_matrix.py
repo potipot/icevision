@@ -107,7 +107,7 @@ def test_pairwise_iou_matching(target, prediction):
 def test_match_predictions_to_targets(target, prediction):
     result = match_predictions_to_targets(target, prediction, iou_threshold=0.5)
     target_list = build_target_list(target)
-    register = Register(keys=target_list, allow_duplicates=True)
+    register = Register(allow_duplicates=True)
     register[
         ObjectDetectionTarget(
             record_id=0,

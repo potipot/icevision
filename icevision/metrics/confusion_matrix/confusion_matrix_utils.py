@@ -38,19 +38,46 @@ class ObjectDetectionMatch(ObjectDetectionItem):
 
 
 class Register(collections.UserDict):
-    def __init__(self, keys: Collection, allow_duplicates=False):
+    def __init__(self, allow_duplicates=False):
         super().__init__()
         self.allow_duplicates = allow_duplicates
-        for key in keys:
-            self.data[key] = {}
+        # self.data = defaultdict(dict)
+
+    def update(self, other=(), /, **kwds):
+        self.data.update(other, **kwds)
 
     def __setitem__(self, key, value: Dict):
-        (item, iou), *_ = value.items()
-        if not self.allow_duplicates:
-            for key, inner_dict in self.data.items():
-                if item in inner_dict.keys():
-                    del self.data[key][item]
-        self.data[key].update(value)
+        # TODO: change self.data to defaultdict with duplicates or not and move this logic to the inner dict
+        duplicate_items = set()
+        for item, iou in value.items():
+            if not self.allow_duplicates:
+                for existing_key, matches_dict in self.data.items():
+                    if item in matches_dict.keys():
+                        existing_iou = matches_dict[item]
+                        if existing_iou >= iou:
+                            duplicate_items.add(item)
+                        else:
+                            del self.data[existing_key][item]
+        for item in duplicate_items:
+            del value[item]
+        # allow multiple matches per prediction
+        self[key].update(value)
+        # single, best iou match per prediction:
+        if len(self.data[key].values()) > 1:
+            self.data[key] = dict([max(self[key].items(), key=lambda item: item[1])])
+
+    def filter_by_label_id(self, label_id: int):
+        register_view = Register(allow_duplicates=self.allow_duplicates)
+        for key, matches_dict in self.data.items():
+            if key.label_id == label_id:
+                register_view.data[key] = {}
+                for inner_key, iou in matches_dict.items():
+                    if inner_key.label_id == label_id:
+                        register_view.update({key: {inner_key: iou}})
+        return register_view
+
+    def register_keys(self, prediction_list):
+        self.data = {prediction: {} for prediction in prediction_list}
 
 
 def default_item():
@@ -75,9 +102,11 @@ def get_best_score_match(prediction_items: Dict[ObjectDetectionItem, float]):
     return best_item
 
 
-def get_best_iou_match(prediction_items: Collection[ObjectDetectionItem]):
+def get_best_iou_match(prediction_items: Dict[ObjectDetectionItem, float]):
     # fill with dummy if list of prediction_items is empty
-    best_item = max(prediction_items, key=lambda x: x.iou_score, default=default_item())
+    best_item = max(
+        prediction_items.items(), key=lambda x: x[1], default=default_item()
+    )
     return best_item
 
 
@@ -169,7 +198,9 @@ def match_predictions_to_targets(
 
     target_list = build_target_list(target)
     prediction_list = build_prediction_list(prediction)
-    register = Register(keys=target_list, allow_duplicates=True)
+    register = Register(allow_duplicates=True)
+    register.register_keys(target_list)
+
     # appending matching predictions to targets
     for pred_id, target_id in pairs_indices:
         single_prediction = prediction_list[pred_id]
@@ -190,8 +221,7 @@ def match_targets_to_predictions(
     """
     matches bboxes, labels from targets with their predictions by iou threshold
     """
-    if prediction.record_id == 39347:
-        print("h")
+
     target_list = build_target_list(target)
     prediction_list = sorted(
         build_prediction_list(prediction), key=lambda item: item.score, reverse=True
@@ -201,7 +231,8 @@ def match_targets_to_predictions(
         target_list=target_list, prediction_list=prediction_list
     )
     pairs_indices = torch.nonzero(iou_table > iou_threshold)
-    register = Register(keys=prediction_list, allow_duplicates=False)
+    register = Register(allow_duplicates=False)
+    register.register_keys(prediction_list)
     # appending matching targets to predictions
     for pred_id, target_id in pairs_indices:
         single_target = target_list[target_id]
@@ -215,15 +246,7 @@ def match_targets_to_predictions(
         iou_score = round(iou_table[pred_id, target_id].item(), 4)
         register[single_prediction] = {single_target: iou_score}
 
-    return prediction_list
-
-
-def filter_by_label_id(label_id, matched_targets):
-    filtered_preds = [pred for pred in matched_targets if pred.label_id == label_id]
-    for pred in filtered_preds:
-        if pred.matches:
-            pred.matches = filter_by_label_id(label_id, pred.matches)
-    return filtered_preds
+    return register
 
 
 class NoCopyRepeat(nn.Module):
