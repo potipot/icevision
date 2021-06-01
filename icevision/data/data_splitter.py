@@ -3,6 +3,7 @@ __all__ = [
     "SingleSplitSplitter",
     "RandomSplitter",
     "FixedSplitter",
+    "FolderSplitter",
 ]
 
 from icevision.imports import *
@@ -36,6 +37,27 @@ class SingleSplitSplitter(DataSplitter):
             idmap: idmap used for getting ids.
         """
         return [idmap.get_ids()]
+
+
+class FolderSplitter(DataSplitter):
+    """
+    Split items into subsets based on provided keywords.
+    Set of items not containing any of the keywords is returned as first.
+    """
+
+    def __init__(self, keywords=Collection[str]):
+        self.keywords = keywords
+
+    def split(self, idmap: IDMap):
+        """Splits ids into parts based on the provided keywords"""
+        all = set(idmap.get_names())
+        others = [set() for key in self.keywords]
+        for item in all:
+            for keyword, other_set in zip(self.keywords, others):
+                if keyword in item:
+                    other_set.add(item)
+        all -= set.union(*others)
+        return [list(map(idmap.get_name, split)) for split in [all, *others]]
 
 
 class RandomSplitter(DataSplitter):
