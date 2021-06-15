@@ -63,6 +63,7 @@ def transform_dl(
     collate_fn = apply_batch_tfms(
         build_batch, batch_tfms=batch_tfms, **build_batch_kwargs
     )
+    # collate_fn = unload_records(collate_fn)
     return DataLoader(dataset=dataset, collate_fn=collate_fn, **dataloader_kwargs)
 
 

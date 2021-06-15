@@ -562,8 +562,8 @@ class WaveformFilepathRecordComponent(BaseFilepathRecordComponent):
 
     def _unload(self):
         self.set_wav(None)
-        # self.set_sr(None)
-        # self.set_duration(None)
+        self.set_sr(None)
+        self.set_duration(None)
 
     def set_filepath(self, filepath: Union[str, Path]):
         super().set_filepath(filepath)
@@ -609,11 +609,11 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
     def __init__(self, task=tasks.asr):
         super().__init__(task=task)
         self.text: str = ""
-        self.text_encoded: List[Hashable] = []
+        # self.text_encoded: List[Hashable] = []
 
     def set_text(self, text: str):
         self.text = text
-        self.text_encoded = self._encode_text(text)
+        # self.text_encoded = self._encode_text(text)
 
     def _encode_text(self, text):
         """Encodes text to numerical values skipping items that are missing in class_map"""
@@ -630,17 +630,20 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
                     + str(e)
                     + " was not found in class_map and will not be encoded",
                 )
-        return encoded_text
+        return np.array(encoded_text).astype('uint8')
 
     def _repr(self) -> List[str]:
         return [
             *super()._repr(),
             f"Text: {self.text}",
-            f"Text encoded: {self.text_encoded}",
+            # f"Text encoded: {self.text_encoded}",
         ]
 
     def as_dict(self) -> dict:
-        return {"text": self.text, "text_encoded": self.text_encoded}
+        return {
+            "text": self.text,
+            # "text_encoded": self.text_encoded,
+        }
 
     def _builder_template(self) -> List[str]:
         return ["record{task}set_text(<str>)"]
