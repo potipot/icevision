@@ -613,7 +613,17 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
 
     def set_text(self, text: str):
         self.text = text
+        self.text = self._normalize_text(text)
         # self.text_encoded = self._encode_text(text)
+
+    def _normalize_text(self, text):
+        """
+        normalizes text by removing special characters, turning text to lowercase and removing leading/trailing spaces
+        """
+        chars_to_ignore_regex = '[\,\?\.\!\-\—\;\:"]'
+        text = re.sub(chars_to_ignore_regex, "", text)
+        text = text.lower().lstrip().strip()
+        return text
 
     def _encode_text(self, text):
         """Encodes text to numerical values skipping items that are missing in class_map"""
@@ -630,7 +640,7 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
                     + str(e)
                     + " was not found in class_map and will not be encoded",
                 )
-        return np.array(encoded_text).astype('uint8')
+        return np.array(encoded_text).astype("uint8")
 
     def _repr(self) -> List[str]:
         return [
