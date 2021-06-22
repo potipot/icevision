@@ -56,14 +56,16 @@ def transform_dl(
     dataset,
     build_batch,
     batch_tfms=None,
-    build_batch_kwargs: dict = {},
+    build_batch_kwargs=None,
     **dataloader_kwargs,
 ):
     """Creates collate_fn from build_batch (collate function) by decorating it with apply_batch_tfms and unload_records"""
+    if build_batch_kwargs is None:
+        build_batch_kwargs = dict()
     collate_fn = apply_batch_tfms(
         build_batch, batch_tfms=batch_tfms, **build_batch_kwargs
     )
-    # collate_fn = unload_records(collate_fn)
+    collate_fn = unload_records(collate_fn)
     return DataLoader(dataset=dataset, collate_fn=collate_fn, **dataloader_kwargs)
 
 

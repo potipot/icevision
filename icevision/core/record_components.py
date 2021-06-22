@@ -620,9 +620,13 @@ class TextlabelsRecordComponent(ClassMapRecordComponent):
         """
         normalizes text by removing special characters, turning text to lowercase and removing leading/trailing spaces
         """
-        chars_to_ignore_regex = '[\,\?\.\!\-\—\;\:"]'
-        text = re.sub(chars_to_ignore_regex, "", text)
-        text = text.lower().lstrip().strip()
+        text = text.upper()
+        unknown_symbols = set(text) - set(self.class_map._id2class)
+        for unknown_symbol in unknown_symbols:
+            text = re.sub(f"[{unknown_symbol}]", " ", text)
+
+        text = re.sub("\s+", " ", text)
+        text = text.lstrip().strip()
         return text
 
     def _encode_text(self, text):
